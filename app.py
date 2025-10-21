@@ -92,26 +92,24 @@ def create_single_certificate(nama, kelas, peringkat, wali_kelas, pimpinan_ponpe
     overlay_buffer = BytesIO()
     c = canvas.Canvas(overlay_buffer, pagesize=(page_width, page_height))
     
-    # Warna 0–255 untuk Pillow
+    # Warna RGB
     gold_color_pil = (184, 134, 11)
     dark_text_color_pil = (31, 52, 83)
-
-    # Warna 0–1 untuk ReportLab
     gold_color_pdf = tuple(v / 255 for v in gold_color_pil)
     dark_text_color_pdf = tuple(v / 255 for v in dark_text_color_pil)
 
-    # === Nama lengkap (font besar berwarna emas) ===
+    # === Nama besar ===
     nama_img = create_text_image(nama, "fonts/OPTIEngraversOldEnglish.otf", 85, gold_color_pil)
     nama_img_buffer = BytesIO()
     nama_img.save(nama_img_buffer, format='PNG')
     nama_img_buffer.seek(0)
-
+    
     nama_img_width = nama_img.width * 0.5
     nama_img_height = nama_img.height * 0.5
 
-    # Jika nama_x diberikan, maka titik tersebut dianggap titik tengah teks
-    nama_x_center = nama_x if nama_x is not None else page_width / 2
-    nama_x_pos = nama_x_center - nama_img_width / 2
+    # Titik tengah nama
+    nama_center_x = nama_x if nama_x is not None else page_width / 2
+    nama_x_pos = nama_center_x - nama_img_width / 2
 
     c.drawImage(
         ImageReader(nama_img_buffer),
@@ -122,31 +120,31 @@ def create_single_certificate(nama, kelas, peringkat, wali_kelas, pimpinan_ponpe
         mask='auto'
     )
 
-    # === Peringkat dan kelas ===
+    # === Peringkat ===
     peringkat_text = f"peringkat ke {peringkat} kelas {kelas}"
     draw_centered_text(
         c,
         peringkat_text,
-        peringkat_x or 425,
+        peringkat_x or page_width / 2,
         peringkat_y,
         font_name="LibreBaskerville",
         font_size=12,
-        color_rgb=gold_color_pdf  # ← warna teks jadi gold
+        color_rgb=gold_color_pdf
     )
 
-    # === Nama wali kelas ===
+    # === Nama wali kelas (centered based on wali_x) ===
     c.setFont("LibreBaskerville", 13)
     c.setFillColorRGB(*dark_text_color_pdf)
     wali_text_width = c.stringWidth(wali_kelas, "LibreBaskerville", 13)
-    wali_x_pos = (wali_x or 185)  # kiri tetap, misal 185
-    c.drawString(wali_x_pos, wali_y, wali_kelas)
+    wali_center_x = wali_x if wali_x is not None else page_width / 2 - 150  # default agak kiri
+    c.drawString(wali_center_x - wali_text_width / 2, wali_y, wali_kelas)
 
-    # === Nama pimpinan ponpes ===
+    # === Nama pimpinan ponpes (centered based on pimpinan_x) ===
     c.setFont("LibreBaskerville", 13)
     c.setFillColorRGB(*dark_text_color_pdf)
     pimpinan_text_width = c.stringWidth(pimpinan_ponpes, "LibreBaskerville", 13)
-    pimpinan_x_pos = (pimpinan_x or 530)  # kiri tetap, misal 530
-    c.drawString(pimpinan_x_pos, pimpinan_y, pimpinan_ponpes)
+    pimpinan_center_x = pimpinan_x if pimpinan_x is not None else page_width / 2 + 150  # default agak kanan
+    c.drawString(pimpinan_center_x - pimpinan_text_width / 2, pimpinan_y, pimpinan_ponpes)
 
     c.save()
     
