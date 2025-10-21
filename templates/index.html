@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Generator Piagam Penghargaan</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Generator Piagam Penghargaan</h1>
+        <p class="subtitle">Dار العلوم دار السرور</p>
+      </header>
+
+      <div class="tabs">
+        <button class="tab-button active" onclick="showTab('single')">
+          Generator Tunggal
+        </button>
+        <button class="tab-button" onclick="showTab('bulk')">
+          Generator Bulk (Excel)
+        </button>
+        <button class="tab-button" onclick="showTab('layout')">
+          Layout Editor (Live Preview)
+        </button>
+      </div>
+
+      <div id="single-tab" class="tab-content active">
+        <div class="form-container">
+          <form action="/generate" method="POST" id="certificateForm">
+            <div class="form-section">
+              <h2>Data Santri/Santriyah</h2>
+
+              <div class="form-group">
+                <label for="nama">Nama Lengkap Sang Juara</label>
+                <input
+                  type="text"
+                  id="nama"
+                  name="nama"
+                  required
+                  placeholder="Masukkan nama lengkap"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="kelas">Kelas</label>
+                <input
+                  type="text"
+                  id="kelas"
+                  name="kelas"
+                  required
+                  placeholder="Contoh: 5A, 6B, dll"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="peringkat">Peringkat</label>
+                <select id="peringkat" name="peringkat" required>
+                  <option value="">Pilih Peringkat</option>
+                  <option value="1">Peringkat 1</option>
+                  <option value="2">Peringkat 2</option>
+                  <option value="3">Peringkat 3</option>
+                  <option value="Juara Umum">Juara Umum</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h2>Data Penandatangan</h2>
+
+              <div class="form-group">
+                <label for="wali_kelas">Nama Wali Kelas</label>
+                <input
+                  type="text"
+                  id="wali_kelas"
+                  name="wali_kelas"
+                  required
+                  placeholder="Masukkan nama wali kelas"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="pimpinan_ponpes">Nama Pimpinan Ponpes</label>
+                <input
+                  type="text"
+                  id="pimpinan_ponpes"
+                  name="pimpinan_ponpes"
+                  required
+                  placeholder="Masukkan nama pimpinan ponpes"
+                />
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn-generate">
+                Generate Piagam Penghargaan
+              </button>
+              <button type="reset" class="btn-reset">Reset Form</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div id="bulk-tab" class="tab-content">
+        <div class="form-container">
+          <div class="info-box">
+            <h3>Cara Menggunakan Generator Bulk</h3>
+            <ol>
+              <li>Siapkan file Excel (.xlsx) dengan format kolom berikut:</li>
+              <ul>
+                <li><strong>Kolom A:</strong> Nama Lengkap</li>
+                <li><strong>Kolom B:</strong> Kelas</li>
+                <li>
+                  <strong>Kolom C:</strong> Peringkat (1, 2, 3, Juara Umum, dll)
+                </li>
+                <li><strong>Kolom D:</strong> Nama Wali Kelas</li>
+                <li><strong>Kolom E:</strong> Nama Pimpinan Ponpes</li>
+              </ul>
+              <li>Baris pertama adalah header (akan dilewati)</li>
+              <li>Upload file Excel Anda</li>
+              <li>Klik tombol Generate untuk membuat semua piagam sekaligus</li>
+              <li>Hasil akan diunduh dalam format ZIP</li>
+            </ol>
+            <div class="example-note">
+              <strong>Contoh Format Excel:</strong><br />
+              <table class="example-table">
+                <tr>
+                  <th>Nama</th>
+                  <th>Kelas</th>
+                  <th>Peringkat</th>
+                  <th>Wali Kelas</th>
+                  <th>Pimpinan Ponpes</th>
+                </tr>
+                <tr>
+                  <td>Najwa Humairah</td>
+                  <td>Tamhidi A</td>
+                  <td>1</td>
+                  <td>Nur Fadilah</td>
+                  <td>Ustadz Obay Wahidi</td>
+                </tr>
+                <tr>
+                  <td>Maryam Fariha</td>
+                  <td>Tamhidi A</td>
+                  <td>2</td>
+                  <td>Nur Fadilah</td>
+                  <td>Ustadz Obay Wahidi</td>
+                </tr>
+              </table>
+            </div>
+          </div>
+
+          <form
+            action="/generate-bulk"
+            method="POST"
+            enctype="multipart/form-data"
+            id="bulkForm"
+          >
+            <div class="form-section">
+              <h2>Upload File Excel</h2>
+
+              <div class="form-group">
+                <label for="excel_file">File Excel (.xlsx)</label>
+                <input
+                  type="file"
+                  id="excel_file"
+                  name="excel_file"
+                  accept=".xlsx"
+                  required
+                />
+                <small>Format: .xlsx | Maksimal 10MB</small>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h2>Pengaturan Layout (Opsional)</h2>
+              <p style="font-size: 0.9em; color: #66bb6a; margin-bottom: 15px">
+                <strong>Fitur baru!</strong> Gunakan tab "Layout Editor (Live
+                Preview)" untuk melihat dan mengatur posisi secara real-time,
+                lalu salin nilai-nilai Y ke sini. Semua sertifikat dalam bulk
+                akan menggunakan layout yang sama.
+              </p>
+
+              <h3>Posisi Vertikal (Y)</h3>
+              <div class="form-group">
+                <label for="bulk_nama_y">Posisi Y Nama (default: 310)</label>
+                <input
+                  type="number"
+                  id="bulk_nama_y"
+                  name="bulk_nama_y"
+                  value="310"
+                  min="200"
+                  max="500"
+                  step="5"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="bulk_peringkat_y"
+                  >Posisi Y Peringkat/Kelas (default: 235)</label
+                >
+                <input
+                  type="number"
+                  id="bulk_peringkat_y"
+                  name="bulk_peringkat_y"
+                  value="235"
+                  min="200"
+                  max="400"
+                  step="5"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="bulk_wali_y"
+                  >Posisi Y Wali Kelas (default: 100)</label
+                >
+                <input
+                  type="number"
+                  id="bulk_wali_y"
+                  name="bulk_wali_y"
+                  value="100"
+                  min="50"
+                  max="250"
+                  step="5"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="bulk_pimpinan_y"
+                  >Posisi Y Pimpinan (default: 100)</label
+                >
+                <input
+                  type="number"
+                  id="bulk_pimpinan_y"
+                  name="bulk_pimpinan_y"
+                  value="100"
+                  min="50"
+                  max="250"
+                  step="5"
+                />
+              </div>
+
+              <h3 style="margin-top: 20px">Posisi Horizontal (X) - Opsional</h3>
+              <p style="font-size: 0.85em; color: #66bb6a; margin-bottom: 10px">
+                Kosongkan untuk auto-center
+              </p>
+
+              <div class="form-group">
+                <label for="bulk_nama_x">Posisi X Nama</label>
+                <input
+                  type="number"
+                  id="bulk_nama_x"
+                  name="bulk_nama_x"
+                  placeholder="Auto (kosongkan)"
+                  min="0"
+                  max="600"
+                  step="5"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="bulk_peringkat_x">Posisi X Peringkat/Kelas</label>
+                <input
+                  type="number"
+                  id="bulk_peringkat_x"
+                  name="bulk_peringkat_x"
+                  placeholder="Auto (kosongkan)"
+                  min="0"
+                  max="600"
+                  step="5"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="bulk_wali_x"
+                  >Posisi X Wali Kelas (default: 190)</label
+                >
+                <input
+                  type="number"
+                  id="bulk_wali_x"
+                  name="bulk_wali_x"
+                  value="190"
+                  min="0"
+                  max="400"
+                  step="5"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="bulk_pimpinan_x"
+                  >Posisi X Pimpinan (default: 515)</label
+                >
+                <input
+                  type="number"
+                  id="bulk_pimpinan_x"
+                  name="bulk_pimpinan_x"
+                  value="515"
+                  min="200"
+                  max="600"
+                  step="5"
+                />
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn-generate">
+                Generate Bulk Piagam
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <footer>
+        <p>&copy; 2025 Dار العلوم دار السرور - Generator Piagam Penghargaan</p>
+      </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+  </body>
+</html>
+
+<div id="layout-tab" class="tab-content">
+  <div class="form-container">
+    <div class="info-box">
+      <h3>Live Layout Editor</h3>
+      <p>
+        Sesuaikan posisi setiap elemen dengan slider, dan lihat preview secara
+        real-time!
+      </p>
+    </div>
+
+    <div class="layout-editor">
+      <div class="layout-controls">
+        <h2>Data Sertifikat</h2>
+        <div class="form-group">
+          <label for="preview_nama">Nama Lengkap</label>
+          <input
+            type="text"
+            id="preview_nama"
+            value="Najwa Humairah"
+            placeholder="Nama untuk preview"
+          />
+        </div>
+        <div class="form-group">
+          <label for="preview_kelas">Kelas</label>
+          <input
+            type="text"
+            id="preview_kelas"
+            value="Tamhidi A"
+            placeholder="Kelas"
+          />
+        </div>
+        <div class="form-group">
+          <label for="preview_peringkat">Peringkat</label>
+          <input
+            type="text"
+            id="preview_peringkat"
+            value="1"
+            placeholder="Peringkat"
+          />
+        </div>
+        <div class="form-group">
+          <label for="preview_wali">Wali Kelas</label>
+          <input
+            type="text"
+            id="preview_wali"
+            value="Nur Fadilah"
+            placeholder="Nama wali kelas"
+          />
+        </div>
+        <div class="form-group">
+          <label for="preview_pimpinan">Pimpinan Ponpes</label>
+          <input
+            type="text"
+            id="preview_pimpinan"
+            value="Ustadz Obay Wahidi"
+            placeholder="Nama pimpinan"
+          />
+        </div>
+
+        <h2 style="margin-top: 30px">Atur Posisi Vertikal (Y)</h2>
+        <div class="form-group">
+          <label for="nama_y_slider"
+            >Posisi Y Nama: <span id="nama_y_value">310</span></label
+          >
+          <input
+            type="range"
+            id="nama_y_slider"
+            min="200"
+            max="500"
+            value="310"
+            step="5"
+          />
+        </div>
+        <div class="form-group">
+          <label for="peringkat_y_slider"
+            >Posisi Y Peringkat/Kelas:
+            <span id="peringkat_y_value">235</span></label
+          >
+          <input
+            type="range"
+            id="peringkat_y_slider"
+            min="200"
+            max="400"
+            value="235"
+            step="5"
+          />
+        </div>
+        <div class="form-group">
+          <label for="wali_y_slider"
+            >Posisi Y Wali Kelas: <span id="wali_y_value">100</span></label
+          >
+          <input
+            type="range"
+            id="wali_y_slider"
+            min="50"
+            max="250"
+            value="100"
+            step="5"
+          />
+        </div>
+        <div class="form-group">
+          <label for="pimpinan_y_slider"
+            >Posisi Y Pimpinan: <span id="pimpinan_y_value">100</span></label
+          >
+          <input
+            type="range"
+            id="pimpinan_y_slider"
+            min="50"
+            max="250"
+            value="100"
+            step="5"
+          />
+        </div>
+
+        <h2 style="margin-top: 30px">Atur Posisi Horizontal (X)</h2>
+        <p style="font-size: 0.85em; color: #66bb6a; margin-bottom: 10px">
+          Kosongkan untuk auto-center
+        </p>
+        <div class="form-group">
+          <label for="nama_x_slider"
+            >Posisi X Nama: <span id="nama_x_value">Auto</span></label
+          >
+          <input
+            type="range"
+            id="nama_x_slider"
+            min="0"
+            max="600"
+            value="300"
+            step="5"
+          />
+          <button
+            type="button"
+            onclick="clearXSlider('nama')"
+            class="btn-clear-x"
+          >
+            Auto Center
+          </button>
+        </div>
+        <div class="form-group">
+          <label for="peringkat_x_slider"
+            >Posisi X Peringkat/Kelas:
+            <span id="peringkat_x_value">Auto</span></label
+          >
+          <input
+            type="range"
+            id="peringkat_x_slider"
+            min="0"
+            max="600"
+            value="300"
+            step="5"
+          />
+          <button
+            type="button"
+            onclick="clearXSlider('peringkat')"
+            class="btn-clear-x"
+          >
+            Auto Center
+          </button>
+        </div>
+        <div class="form-group">
+          <label for="wali_x_slider"
+            >Posisi X Wali Kelas: <span id="wali_x_value">Auto</span></label
+          >
+          <input
+            type="range"
+            id="wali_x_slider"
+            min="0"
+            max="400"
+            value="150"
+            step="5"
+          />
+          <button
+            type="button"
+            onclick="clearXSlider('wali')"
+            class="btn-clear-x"
+          >
+            Auto Center
+          </button>
+        </div>
+        <div class="form-group">
+          <label for="pimpinan_x_slider"
+            >Posisi X Pimpinan: <span id="pimpinan_x_value">Auto</span></label
+          >
+          <input
+            type="range"
+            id="pimpinan_x_slider"
+            min="200"
+            max="600"
+            value="450"
+            step="5"
+          />
+          <button
+            type="button"
+            onclick="clearXSlider('pimpinan')"
+            class="btn-clear-x"
+          >
+            Auto Center
+          </button>
+        </div>
+
+        <button onclick="updatePreview()" class="btn-generate">
+          Update Preview
+        </button>
+        <button onclick="resetPositions()" class="btn-reset">
+          Reset ke Default
+        </button>
+      </div>
+
+      <div class="layout-preview">
+        <h2>Preview PDF</h2>
+        <div class="pdf-preview-container">
+          <iframe id="pdf-preview" src="" width="100%" height="600px"></iframe>
+          <div class="preview-placeholder">
+            <p>Klik "Update Preview" untuk melihat hasil</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
